@@ -24,6 +24,7 @@ if (!window.__aiDetect) {
     root.querySelector('.x').onclick = () => { host.remove(); boxes.delete(src); };
 
     const img = [...document.images].find((i) => i.currentSrc === src || i.src === src);
+    host.style.all = 'initial'; // 先重設，避免頁面 CSS 滲入；之後的屬性仍會生效
     Object.assign(host.style, { zIndex: 2147483647, transform: 'translateX(-100%)' });
     if (img) {
       const r = img.getBoundingClientRect();
@@ -31,7 +32,7 @@ if (!window.__aiDetect) {
     } else {
       Object.assign(host.style, { position: 'fixed', top: '8px', left: 'calc(100% - 8px)' });
     }
-    document.body.appendChild(host);
+    document.documentElement.appendChild(host);
 
     function line(text, color, cls) {
       const d = document.createElement('div');

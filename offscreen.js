@@ -3,7 +3,8 @@ ort.env.wasm.numThreads = 1; // extension 頁面沒有 cross-origin isolation，
 
 let sessionPromise;
 const getSession = () =>
-  (sessionPromise ??= ort.InferenceSession.create(chrome.runtime.getURL('models/detectra.onnx')));
+  (sessionPromise ??= ort.InferenceSession.create(chrome.runtime.getURL('models/detectra.onnx'))
+    .catch((e) => { sessionPromise = null; throw e; })); // 失敗不快取，下次可重試
 
 async function localScore(blob) {
   const data = preprocess(await createImageBitmap(blob, { colorSpaceConversion: 'none' }));
@@ -15,12 +16,12 @@ async function localScore(blob) {
 
 async function sightengine(blob, user, secret) {
   const fd = new FormData();
-  fd.append('media', blob, 'image');
+  fd.append('media', blob, `image.${blob.type.split('/')[1] || 'jpg'}`);
   fd.append('models', 'genai');
   fd.append('api_user', user);
   fd.append('api_secret', secret);
   const r = await fetch('https://api.sightengine.com/1.0/check.json', { method: 'POST', body: fd });
-  const j = await r.json();
+  const j = await r.json().catch(() => { throw new Error(`HTTP ${r.status}`); });
   if (j.status !== 'success') throw new Error(j.error?.message || `HTTP ${r.status}`);
   return j.type.ai_generated;
 }
