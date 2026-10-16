@@ -2,7 +2,7 @@
 
 Chrome 擴充功能：在網頁圖片上按右鍵 →「偵測 AI 圖片」，用本機模型估計該圖為 AI 生成的機率。可選填 Sightengine API 金鑰取得第二意見。
 
-- 本機推論：[Detectra](https://huggingface.co/Vontra/detectra-v1)（ViT-S/16 @384，MIT）＋ [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) WASM。
+- 本機推論：[Detectra](https://huggingface.co/Vontra/detectra-v1)（ViT-S/16，輸入 384×384，MIT）＋ [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) WASM。
 - 雲端（選用）：[Sightengine](https://sightengine.com) `genai` 模型。
 - 支援在圖片上覆蓋透明圖層的網站（如 Instagram）。
 
