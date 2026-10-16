@@ -12,9 +12,9 @@ if (!window.__aiDetect) {
   const COLORS = { ai: '#d32f2f', unsure: '#f9a825', real: '#2e7d32' };
   function verdict(score) {
     const pct = Math.round(score * 100);
-    if (score >= 0.7) return [`可能是 AI ${pct}%`, COLORS.ai];
-    if (score >= 0.3) return [`不確定 ${pct}%`, COLORS.unsure];
-    return [`可能是真圖 ${pct}%`, COLORS.real];
+    if (score >= 0.7) return [`可能是 AI（AI 機率 ${pct}%）`, COLORS.ai];
+    if (score >= 0.3) return [`不確定（AI 機率 ${pct}%）`, COLORS.unsure];
+    return [`可能是真圖（AI 機率 ${pct}%）`, COLORS.real];
   }
 
   function makeBox(src) {
