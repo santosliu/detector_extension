@@ -3,6 +3,12 @@ if (!window.__aiDetect) {
   window.__aiDetect = true;
   const boxes = new Map();
 
+  // 記錄游標下的圖片（覆蓋層網站右鍵點到的是 div）
+  let lastImg = null;
+  addEventListener('contextmenu', (e) => {
+    lastImg = document.elementsFromPoint(e.clientX, e.clientY).find((el) => el.tagName === 'IMG') || null;
+  }, true);
+
   const COLORS = { ai: '#d32f2f', unsure: '#f9a825', real: '#2e7d32' };
   function verdict(score) {
     const pct = Math.round(score * 100);
@@ -23,7 +29,9 @@ if (!window.__aiDetect) {
     const content = root.querySelector('.c');
     root.querySelector('.x').onclick = () => { host.remove(); boxes.delete(src); };
 
-    const img = [...document.images].find((i) => i.currentSrc === src || i.src === src);
+    const img = lastImg && (lastImg.currentSrc === src || lastImg.src === src)
+      ? lastImg
+      : [...document.images].find((i) => i.currentSrc === src || i.src === src);
     host.style.all = 'initial'; // 先重設，避免頁面 CSS 滲入；之後的屬性仍會生效
     Object.assign(host.style, { zIndex: 2147483647, transform: 'translateX(-100%)' });
     if (img) {
@@ -45,7 +53,7 @@ if (!window.__aiDetect) {
     return {
       render(msg) {
         content.replaceChildren();
-        if (!img) line(src, null, 'u');
+        if (!img && src) line(src, null, 'u');
         if (msg.type === 'pending') return line('偵測中…');
         if (msg.error) return line(msg.error, COLORS.ai);
         const show = (name, r) => {
@@ -58,7 +66,11 @@ if (!window.__aiDetect) {
     };
   }
 
-  chrome.runtime.onMessage.addListener((msg) => {
+  chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+    if (msg.type === 'lastImage') {
+      sendResponse(lastImg ? lastImg.currentSrc || lastImg.src : null);
+      return;
+    }
     if (!boxes.has(msg.src)) boxes.set(msg.src, makeBox(msg.src));
     boxes.get(msg.src).render(msg);
   });

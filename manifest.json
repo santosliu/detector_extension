@@ -2,8 +2,11 @@
   "manifest_version": 3,
   "name": "AI 圖片偵測",
   "version": "0.1.0",
-  "permissions": ["contextMenus", "offscreen", "storage", "scripting"],
+  "permissions": ["contextMenus", "offscreen", "storage"],
   "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    { "matches": ["<all_urls>"], "js": ["content.js"], "all_frames": true, "run_at": "document_start" }
+  ],
   "background": { "service_worker": "background.js" },
   "options_page": "options.html",
   "content_security_policy": {
