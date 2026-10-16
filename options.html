@@ -1,8 +1,77 @@
 <!doctype html>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI 圖片偵測設定</title>
-<h3>Sightengine（選填）</h3>
-<p><label>api_user <input id="api_user"></label></p>
-<p><label>api_secret <input id="api_secret" type="password"></label></p>
-<button id="save">儲存</button> <span id="msg"></span>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #fff; --text: #1d1f23; --muted: #646a73;
+    --border: #dcdfe4; --accent: #2563eb; --accent-text: #fff; --ok: #2e7d32; --note: #eef3ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16181c; --card: #1f2227; --text: #e6e8eb; --muted: #9aa1ab;
+      --border: #343840; --accent: #4f8cff; --accent-text: #0b1020; --ok: #66bb6a; --note: #1b2436;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.6 system-ui, sans-serif; }
+  main { max-width: 560px; margin: 40px auto; padding: 0 16px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  section { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  h2 { font-size: 15px; margin: 0 0 12px; }
+  ol { margin: 0; padding-left: 20px; }
+  li { margin-bottom: 6px; }
+  a { color: var(--accent); }
+  .note { background: var(--note); border-radius: 8px; padding: 10px 12px; margin-top: 12px; color: var(--muted); font-size: 13px; }
+  label { display: block; font-weight: 600; margin-bottom: 6px; }
+  .field { margin-bottom: 14px; }
+  .row { display: flex; gap: 8px; }
+  input { flex: 1; width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+          background: var(--bg); color: var(--text); font: 13px ui-monospace, monospace; }
+  input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  button { padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--card);
+           color: var(--text); font: inherit; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+  .actions { display: flex; align-items: center; gap: 8px; }
+  #msg { color: var(--ok); }
+</style>
+<main>
+  <h1>AI 圖片偵測設定</h1>
+  <p class="sub">本機模型免設定即可使用。填入 Sightengine 金鑰後，偵測結果會多一行雲端判斷作為第二意見。</p>
+
+  <section>
+    <h2>如何取得 Sightengine API 金鑰</h2>
+    <ol>
+      <li>到 <a href="https://dashboard.sightengine.com/signup" target="_blank" rel="noopener">Sightengine 註冊頁</a> 建立免費帳號。</li>
+      <li>登入 <a href="https://dashboard.sightengine.com/login" target="_blank" rel="noopener">Sightengine 後台</a>，在 API 金鑰頁面找到 <code>API user</code> 與 <code>API secret</code>。</li>
+      <li>把兩個值貼到下方欄位，按「儲存」。</li>
+      <li>回到任一網頁，對圖片按右鍵 →「偵測 AI 圖片」，浮層會多出「Sightengine」一行。</li>
+    </ol>
+    <div class="note">
+      免費方案每月 2,000 次操作、每日上限 500 次，每次偵測都會消耗額度。<br>
+      金鑰只存在這台電腦的瀏覽器中，只會送往 <code>api.sightengine.com</code>。不填就只使用本機模型。
+    </div>
+  </section>
+
+  <section>
+    <h2>Sightengine 金鑰（選填）</h2>
+    <div class="field">
+      <label for="api_user">API user</label>
+      <input id="api_user" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="api_secret">API secret</label>
+      <div class="row">
+        <input id="api_secret" type="password" autocomplete="off" spellcheck="false">
+        <button id="toggle" type="button">顯示</button>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="save" class="primary">儲存</button>
+      <button id="clear" type="button">清除</button>
+      <span id="msg" role="status"></span>
+    </div>
+  </section>
+</main>
 <script src="options.js"></script>
