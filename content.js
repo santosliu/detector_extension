@@ -17,43 +17,42 @@ if (!window.__aiDetect) {
     return [`可能是真圖（AI 機率 ${pct}%）`, COLORS.real];
   }
 
+  // 用原生 <dialog> 置中彈出：showModal() 進 top layer，自帶背景遮罩與 Esc 關閉
   function makeBox(src) {
     const host = document.createElement('div');
+    host.style.all = 'initial'; // 避免頁面 CSS 滲入
     const root = host.attachShadow({ mode: 'closed' });
     root.innerHTML = `<style>
-      .b{font:13px/1.4 system-ui,sans-serif;background:#fff;color:#222;border-radius:6px;
-         box-shadow:0 2px 8px #0005;padding:6px 26px 6px 8px;position:relative;max-width:320px}
-      .x{position:absolute;top:2px;right:6px;cursor:pointer;border:0;background:none;font-size:16px}
-      .u{font-size:11px;color:#666;word-break:break-all}
-    </style><div class="b"><button class="x">×</button><div class="c"></div></div>`;
+      dialog{font:16px/1.5 system-ui,sans-serif;background:#fff;color:#222;border:0;border-radius:10px;
+         box-shadow:0 8px 32px #0008;padding:20px 24px;min-width:280px;max-width:min(420px,90vw);text-align:center}
+      dialog::backdrop{background:#0006}
+      .x{position:absolute;top:6px;right:10px;cursor:pointer;border:0;background:none;font-size:22px;color:#666}
+      img{max-width:100%;max-height:200px;border-radius:6px;margin-bottom:12px}
+      .c div{font-weight:600;margin:4px 0}
+    </style><dialog><button class="x" aria-label="關閉">×</button><img alt=""><div class="c"></div></dialog>`;
+    const dialog = root.querySelector('dialog');
     const content = root.querySelector('.c');
-    root.querySelector('.x').onclick = () => { host.remove(); boxes.delete(src); };
-
-    const img = lastImg && (lastImg.currentSrc === src || lastImg.src === src)
-      ? lastImg
-      : [...document.images].find((i) => i.currentSrc === src || i.src === src);
-    host.style.all = 'initial'; // 先重設，避免頁面 CSS 滲入；之後的屬性仍會生效
-    Object.assign(host.style, { zIndex: 2147483647, transform: 'translateX(-100%)' });
-    if (img) {
-      const r = img.getBoundingClientRect();
-      Object.assign(host.style, { position: 'absolute', top: `${r.top + scrollY + 4}px`, left: `${r.right + scrollX - 4}px` });
-    } else {
-      Object.assign(host.style, { position: 'fixed', top: '8px', left: 'calc(100% - 8px)' });
-    }
+    if (src) root.querySelector('img').src = src;
+    else root.querySelector('img').remove();
+    dialog.onclose = () => { host.remove(); boxes.delete(src); };
+    root.querySelector('.x').onclick = () => dialog.close();
+    dialog.onclick = (e) => { // 點遮罩關閉（padding 的 target 也是 dialog，需比座標）
+      const r = dialog.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close();
+    };
     document.documentElement.appendChild(host);
+    dialog.showModal();
 
-    function line(text, color, cls) {
+    function line(text, color) {
       const d = document.createElement('div');
       d.textContent = text;
       if (color) d.style.color = color;
-      if (cls) d.className = cls;
       content.appendChild(d);
     }
 
     return {
       render(msg) {
         content.replaceChildren();
-        if (!img && src) line(src, null, 'u');
         if (msg.type === 'pending') return line('偵測中…');
         if (msg.error) return line(msg.error, COLORS.ai);
         const show = (name, r) => {
